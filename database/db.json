@@ -1,0 +1,32 @@
+{
+  "schedule": [
+    {
+      "address": "https://google.com",
+      "name": "https://google.com",
+      "path": "/workspaces/am-i-alive/jobs/http.js",
+      "interval": "every 15 seconds",
+      "port": 443
+    },
+    {
+      "address": "https://www.amazon.com/",
+      "name": "https://www.amazon.com/",
+      "path": "/workspaces/am-i-alive/jobs/http.js",
+      "interval": "every 20 seconds",
+      "port": 443
+    },
+    {
+      "address": "https://blue1.com",
+      "name": "https://blue1.com",
+      "path": "/workspaces/am-i-alive/jobs/http.js",
+      "interval": "every 25 seconds",
+      "port": 443
+    },
+    {
+      "address": "8.8.8.8",
+      "name": "Google DNS",
+      "path": "/workspaces/am-i-alive/jobs/ping.js",
+      "interval": "every 25 seconds",
+      "port": 53
+    }
+  ]
+}

@@ -1,60 +1,50 @@
 import { Server } from "socket.io";
 import Bree from "bree";
+import { Low, JSONFile } from "lowdb";
+import serverPath from "../../util";
 
 let io: any;
 let bree: any;
+let lowdb: any;
 
-const workerMessageHandler = ({name, message}: any) => {
-  const payload = {...message, name}
-  io.local.emit("welcome", `${new Date().toISOString()}:${JSON.stringify(payload)}`);
+const workerMessageHandler = ({ name, message }: any) => {
+  const payload = { ...message, name };
+  io.local.emit(
+    "update",
+    `${new Date().toISOString()}:${JSON.stringify(payload)}`
+  );
 };
 
 const init_io = (res: any) => {
   io = new Server(res.socket.server);
-
   io.on("connect", async (socket: any) => {
-    socket.emit("welcome", "welcome to server");
+    socket.emit("welcome", lowdb.data.schedule);
   });
   console.log("Socket.IO Ready");
 };
 
 const init_bree = async () => {
-  bree = new Bree({ jobs: ["foo"], workerMessageHandler });
-  await bree.add({
-    name: "google",
-    interval: "every 10 seconds",
-    path: '/workspaces/am-i-alive/jobs/test.js',
-    worker: {
-      workerData: {
-        url: "https://google.com",
-      },
-    },
-  });
-  await bree.add({
-    name: "amazon",
-    interval: "every 15 seconds",
-    path: '/workspaces/am-i-alive/jobs/test.js',
-    worker: {
-      workerData: {
-        url: "https://www.amazon.com/",
-      },
-    },
-  });
-  await bree.add({
-    name: "blue1",
-    interval: "every 20 seconds",
-    path: '/workspaces/am-i-alive/jobs/test.js',
-    worker: {
-      workerData: {
-        url: "https://blue1.com/",
-      },
-    },
-  });
+  await lowdb.read();
+  const { schedule } = lowdb.data;
+  const jobs = schedule.map((x: any) => ({
+    name: x.name,
+    interval: x.interval,
+    path: x.path,
+    worker: { workerData: { url: x.address, port: x.port } },
+  }));
+  bree = new Bree({ jobs: ["init"].concat(jobs), workerMessageHandler });
   await bree.start();
 };
 
+const init_lowdb = () => {
+  const file = serverPath("database/db.json");
+  const adapter = new JSONFile(file);
+  lowdb = new Low(adapter);
+};
+
 export default async function SocketHandler(req: any, res: any) {
-  !io && init_io(res);
+  !lowdb && init_lowdb();
   !bree && init_bree();
+  !io && init_io(res);
   res.end();
 }

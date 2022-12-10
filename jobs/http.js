@@ -12,5 +12,5 @@ got(url, { timeout: { request: 1000 } })
   .then((res) => {
     result.ok = res.statusCode === 200;
   }).catch(err => {}).finally(() => {
-    parentPort?.postMessage(result);
+    parentPort.postMessage(result);
   });

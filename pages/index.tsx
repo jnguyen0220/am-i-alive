@@ -12,27 +12,30 @@ const sendMessage = async () => {
   socket.emit("createdMessage", { author: "Jonny Nguyen", message: "testing" });
 };
 
-const socketInitializer = async () => {
+const socketInitializer = async (setRowData: any) => {
   await fetch("/api/socket");
   socket = io();
 
-  socket.on("welcome", (msg: any) => {
+  // socket.on("welcome", (msg: any) => {});
+  socket.on("update", (msg: any) => {
     console.log(msg);
+  });
+
+  socket.on("welcome", (msg: any) => {
+    setRowData(msg);
   });
 };
 
 export default function Home() {
+  const [rowData, setRowData] = useState([]);
   useEffect(() => {
-    socketInitializer(), [];
-  });
+    socketInitializer(setRowData);
+  }, [setRowData]);
 
   const [columnDefs] = useState([
-    { headerName: "First Name", field: "first_name" },
-    { headerName: "Last Name", field: "last_name" },
-    { headerName: "Job Title", field: "job_title" },
-    { field: "office" },
-    { field: "email" },
-    { field: "phone" },
+    { headerName: "Address", field: "address" },
+    { headerName: "Name", field: "name" },
+    { headerName: "Interval", field: "interval" },
   ]);
 
   return (
@@ -48,11 +51,7 @@ export default function Home() {
           className="ag-theme-alpine"
           style={{ height: "600px", width: "100%" }}
         >
-          <AgGridReact
-            rowData={[]}
-            columnDefs={columnDefs}
-            // style={{ height: "100%", width: "100%" }}
-          ></AgGridReact>
+          <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
         </div>
       </main>
 
